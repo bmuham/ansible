@@ -1,0 +1,62 @@
+---
+- hosts: windows 
+  gather_facts: yes 
+  vars:
+     contents: "{{ lookup('file', '/home/ansible/playbooks/windows/facts/ansible_wu.txt') }}"
+  tasks:
+#    - name: check on reboot requirement
+#      raw: shutdown.exe /r /t 10 /d p:2:3
+  
+    - name: Find (all) updates 
+      win_updates:
+        category_names:
+          - Application
+          - Connectors
+          - DefinitionUpdates
+          - DeveloperKits
+          - FeaturePacks
+          - Guidance
+          - ServicePacks
+          - Tools
+          - UpdateRollups
+          - CriticalUpdates
+          - SecurityUpdates
+          - Updates
+          - UpdateRollups
+        state: searched 
+        log_path: c:\ansible_wui_list.txt 
+      register: found_update_count 
+         
+    - name: Display (all) updtes 
+      debug: var=found_update_count
+      tags: Updates
+    
+    - name: Decision 
+      pause: prompt='Please confirm you want to exterminate mankind! Press return to continue. Press Ctrl+c and then "a" to abort'
+
+    - name: Install (all) updates
+      win_updates:
+        category_names:
+          - Application
+          - Connectors
+          - DefinitionUpdates
+          - DeveloperKits
+          - FeaturePacks
+          - Guidance
+          - ServicePacks
+          - Tools
+          - UpdateRollups
+          - CriticalUpdates
+          - SecurityUpdates
+          - Updates
+          - UpdateRollups
+        state: installed
+        log_path: c:\ansible_wui_installed.txt
+      register: check_finish 
+
+    - name: Check on reboot requirement 
+      debug: var=check_finish  
+
+    - name: Reboot if needed.
+      raw: shutdown.exe /r /t 10 /d p:2:3
+      when: check_finish.reboot_required != false 
