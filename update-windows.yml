@@ -27,7 +27,7 @@
         log_path: c:\ansible_wui_list.txt 
       register: found_update_count 
          
-    - name: Display (all) updtes 
+    - name: Display (all) updates 
       debug: var=found_update_count
       tags: Updates
     
